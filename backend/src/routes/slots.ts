@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { storage } from '../../../server/storage';
+import { storage } from '../db/storage';
 import { cloudPlayClient } from '../integrations/cloudplay';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 
@@ -18,80 +18,100 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
-router.post('/create', async (req: AuthRequest, res: Response) => {
+router.post('/enable-moonlight', async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
-    const { slotName } = req.body;
+    const { username, password } = req.body;
 
-    if (!slotName) {
-      return res.status(400).json({ error: 'Slot name is required' });
+    if (!username || !password) {
+      return res.status(400).json({ error: 'CloudPlay username and password required' });
     }
 
-    const cloudPlaySlot = await cloudPlayClient.createSlot(userId, slotName);
+    const cloudPlaySlot = await cloudPlayClient.createAndEnableMoonlightSlot(username, password);
+    if (!cloudPlaySlot) {
+      return res.status(500).json({ error: 'Failed to enable Moonlight slot' });
+    }
 
     const slot = await storage.createGamingSlot({
       userId,
-      slotName,
+      slotName: cloudPlaySlot.name,
       cloudplaySlotId: cloudPlaySlot.id,
+      ipAddress: cloudPlaySlot.ipAddress,
       status: cloudPlaySlot.status,
       pinCode: cloudPlaySlot.pinCode,
-      gameUrl: cloudPlaySlot.gameUrl,
     });
 
-    res.json({ slot });
-  } catch (error) {
-    console.error('Create slot error:', error);
-    res.status(500).json({ error: 'Failed to create gaming slot' });
-  }
-});
-
-router.post('/:slotId/start', async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.userId!;
-    const { slotId } = req.params;
-    const { pinCode } = req.body;
-
-    const user = await storage.getUser(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const requiredBalance = 5.0;
-    if (parseFloat(user.balance) < requiredBalance) {
-      return res.status(400).json({ 
-        error: 'Insufficient balance',
-        balance: user.balance,
-        required: requiredBalance,
-      });
-    }
-
-    const result = await cloudPlayClient.startGame(slotId, pinCode);
-
-    await storage.updateGamingSlot(parseInt(slotId), {
-      status: 'running',
-      gameUrl: result.gameUrl,
-      lastUsedAt: new Date(),
-    });
-
-    const newBalance = (parseFloat(user.balance) - requiredBalance).toFixed(2);
-    await storage.updateUserBalance(userId, newBalance);
-
-    await storage.createTransaction({
-      userId,
-      amount: requiredBalance.toFixed(2),
-      type: 'game_charge',
-      status: 'completed',
-      description: `Game started on slot ${slotId}`,
+    await storage.updateUser(userId, {
+      cloudplayUserId: username,
     });
 
     res.json({ 
-      success: true, 
-      gameUrl: result.gameUrl,
-      newBalance,
+      success: true,
+      slot: {
+        id: slot.id,
+        name: slot.slotName,
+        ipAddress: cloudPlaySlot.ipAddress,
+        pinCode: cloudPlaySlot.pinCode,
+        status: cloudPlaySlot.status,
+      },
+      message: cloudPlaySlot.pinCode 
+        ? `Moonlight slot enabled! PIN code: ${cloudPlaySlot.pinCode}` 
+        : 'Moonlight slot enabled!'
     });
   } catch (error) {
-    console.error('Start game error:', error);
-    res.status(500).json({ error: 'Failed to start game' });
+    console.error('Enable Moonlight error:', error);
+    res.status(500).json({ error: 'Failed to enable Moonlight slot' });
+  }
+});
+
+router.get('/cloudplay-slots', async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const user = await storage.getUser(userId);
+
+    if (!user || !user.cloudplayUserId) {
+      return res.status(400).json({ error: 'CloudPlay credentials not set' });
+    }
+
+    const availableSlots = await cloudPlayClient.getAvailableSlots();
+    res.json({ slots: availableSlots });
+  } catch (error) {
+    console.error('Get CloudPlay slots error:', error);
+    res.status(500).json({ error: 'Failed to get CloudPlay slots' });
+  }
+});
+
+router.post('/:slotId/submit-pin', async (req: AuthRequest, res: Response) => {
+  try {
+    const { slotId } = req.params;
+    const { pinCode, cloudplaySlotId } = req.body;
+
+    if (!pinCode) {
+      return res.status(400).json({ error: 'PIN code is required' });
+    }
+
+    const targetSlotId = cloudplaySlotId || slotId;
+
+    const success = await cloudPlayClient.submitPinCode(targetSlotId, pinCode);
+    if (!success) {
+      return res.status(400).json({ error: 'Failed to submit PIN code' });
+    }
+
+    const slotIdNum = parseInt(slotId);
+    if (!isNaN(slotIdNum)) {
+      await storage.updateGamingSlot(slotIdNum, {
+        status: 'running',
+        lastUsedAt: new Date(),
+      });
+    }
+
+    res.json({ 
+      success: true,
+      message: 'PIN code submitted successfully. Moonlight should now be accessible.'
+    });
+  } catch (error) {
+    console.error('Submit PIN error:', error);
+    res.status(500).json({ error: 'Failed to submit PIN code' });
   }
 });
 

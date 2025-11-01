@@ -17,8 +17,8 @@ export const transactions = pgTable('transactions', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').notNull().references(() => users.id),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
-  type: text('type').notNull(), // 'deposit', 'withdrawal', 'game_charge'
-  status: text('status').notNull().default('pending'), // 'pending', 'completed', 'failed'
+  type: text('type').notNull(),
+  status: text('status').notNull().default('pending'),
   stripePaymentId: text('stripe_payment_id'),
   description: text('description'),
   createdAt: timestamp('created_at').notNull().defaultNow(),

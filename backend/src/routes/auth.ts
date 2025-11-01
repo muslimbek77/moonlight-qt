@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { storage } from '../../../server/storage';
+import { storage } from '../db/storage';
 import { generateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -76,6 +76,34 @@ router.post('/login', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+router.get('/profile', async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const user = await storage.getUser(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        balance: user.balance,
+      },
+    });
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    res.status(401).json({ error: 'Invalid token' });
   }
 });
 

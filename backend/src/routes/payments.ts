@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { storage } from '../../../server/storage';
+import { storage } from '../db/storage';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
