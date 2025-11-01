@@ -1,0 +1,56 @@
+modules = ["cpp-clang14", "bash", "nodejs-20"]
+[agent]
+expertMode = true
+integrations = ["javascript_database:1.0.0"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["qt6.full", "pkg-config", "ffmpeg", "SDL2", "SDL2_ttf", "openssl", "libopus", "libva", "libvdpau", "libxkbcommon", "wayland", "wayland-protocols", "libdrm", "mesa", "xorg.xorgserver", "xorg.xauth", "xorg.xinit", "xorg.libX11", "xorg.libXext", "xorg.libXrender", "xorg.libXinerama", "xorg.libXi", "xorg.libXcursor", "xorg.libXrandr", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXfixes", "xorg.libxcb", "gcc", "gnumake", "libglvnd", "libGL"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "frontend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "backend"
+
+[[workflows.workflow]]
+name = "frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && npm run dev"
+waitForPort = 3000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
