@@ -8,15 +8,22 @@ import CloudPlayAPI 1.0
 Item {
     id: dashboard
     
-    CloudPlayAPI {
-        id: cloudPlayAPI
-        
-        onLoginSuccess: function(userData) {
+    property var cloudPlayAPI: CloudPlayAPI
+    
+    Component.onCompleted: {
+        // Connect CloudPlayAPI signals
+        cloudPlayAPI.loginSuccess.connect(function(userData) {
             console.log("CloudPlay login successful:", userData.username)
             userInfo.text = "Welcome, " + userData.username
             balanceText.text = "Balance: $" + userData.balance
             loadDashboardData()
-        }
+        })
+        
+        cloudPlayAPI.loginError.connect(function(error) {
+            console.log("CloudPlay login error:", error)
+            errorText.text = "Login failed: " + error
+        })
+    }
         
         onLoginError: function(error) {
             console.log("CloudPlay login error:", error)

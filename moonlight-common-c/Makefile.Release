@@ -36,7 +36,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = moonlight-common-c1.0.0
-DISTDIR = /home/muslim/moonlight-qt/moonlight-common-c/release/moonlight-common-c1.0.0
+DISTDIR = /home/rasulbek/muslim-projects/moonlight-qt/moonlight-common-c/release/moonlight-common-c1.0.0
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -110,7 +110,7 @@ OBJECTS       = release/rs.o \
 		release/VideoStream.o
 DIST          = ../.qmake.stash \
 		../globaldefs.pri \
-		moonlight-common-c.pro /home/muslim/moonlight-qt/moonlight-common-c/moonlight-common-c/src/Limelight.h moonlight-common-c/reedsolomon/rs.c \
+		moonlight-common-c.pro /home/rasulbek/muslim-projects/moonlight-qt/moonlight-common-c/moonlight-common-c/src/Limelight.h moonlight-common-c/reedsolomon/rs.c \
 		moonlight-common-c/enet/callbacks.c \
 		moonlight-common-c/enet/compress.c \
 		moonlight-common-c/enet/host.c \
