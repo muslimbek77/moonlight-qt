@@ -24,23 +24,6 @@ Item {
             errorText.text = "Login failed: " + error
         })
     }
-        
-        onLoginError: function(error) {
-            console.log("CloudPlay login error:", error)
-            errorDialog.text = "Login Error: " + error
-            errorDialog.open()
-        }
-        
-        onComputersReceived: function(computers) {
-            console.log("Computers received:", JSON.stringify(computers))
-            updateComputerList(computers)
-        }
-        
-        onIpAddressesReceived: function(addresses) {
-            console.log("IP addresses received:", JSON.stringify(addresses))
-            updateIPList(addresses)
-        }
-    }
     
     function loadDashboardData() {
         cloudPlayAPI.getAvailableComputers()
