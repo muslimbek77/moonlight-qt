@@ -36,8 +36,8 @@ Item {
     }
     
     function loadDashboardData() {
-        cloudApi.getAvailableComputers()
-        cloudApi.getIPAddresses()
+        cloudPlayAPI.getAvailableComputers()
+        cloudPlayAPI.getIPAddresses()
     }
     
     function updateComputerList(computers) {
@@ -118,12 +118,12 @@ Item {
                             
                             Button {
                                 id: loginButton
-                                text: cloudApi.authenticated ? "Logout" : "Login"
+                                text: cloudPlayAPI.authenticated ? "Logout" : "Login"
                             Material.background: Material.accent
                             
                             onClicked: {
-                                if (cloudApi.authenticated) {
-                                    cloudApi.logout()
+                                if (cloudPlayAPI.authenticated) {
+                                    cloudPlayAPI.logout()
                                     userInfo.text = "CloudPlay Dashboard"
                                     balanceText.text = "Please login to continue"
                                 } else {
@@ -134,21 +134,21 @@ Item {
                             
                             Button {
                                 text: "Sync with Moonlight"
-                                enabled: cloudApi.authenticated
+                                enabled: cloudPlayAPI.authenticated
                                 Material.background: Material.Teal
                                 
                                 onClicked: {
-                                    cloudApi.syncProfilesWithMoonlight()
+                                    cloudPlayAPI.syncProfilesWithMoonlight()
                                 }
                             }
                             
                             Button {
                                 text: "Add IPs to Moonlight"
-                                enabled: cloudApi.authenticated
+                                enabled: cloudPlayAPI.authenticated
                                 Material.background: Material.Blue
                                 
                                 onClicked: {
-                                    cloudApi.addCloudPlayIPsToMoonlight()
+                                    cloudPlayAPI.addCloudPlayIPsToMoonlight()
                                 }
                             }
                         }
@@ -169,12 +169,12 @@ Item {
                             
                             Button {
                                 text: "Refresh"
-                                onClicked: cloudApi.getAvailableComputers()
+                                onClicked: cloudPlayAPI.getAvailableComputers()
                             }
                             
                             Button {
                                 text: "Auto Assign"
-                                onClicked: cloudApi.assignComputerData(1)
+                                onClicked: cloudPlayAPI.assignComputerData(1)
                             }
                             
                             Item { Layout.fillWidth: true }
@@ -252,7 +252,7 @@ Item {
                                 text: "Add IP"
                                 onClicked: {
                                     if (newIPField.text.length > 0) {
-                                        cloudApi.createIPAddress(newIPField.text)
+                                        cloudPlayAPI.createIPAddress(newIPField.text)
                                         newIPField.text = ""
                                     }
                                 }
@@ -260,7 +260,7 @@ Item {
                             
                             Button {
                                 text: "Refresh"
-                                onClicked: cloudApi.getIPAddresses()
+                                onClicked: cloudPlayAPI.getIPAddresses()
                             }
                         }
                         
@@ -297,7 +297,7 @@ Item {
                                         Material.background: status === "Active" ? Material.Red : Material.Green
                                         
                                         onClicked: {
-                                            cloudApi.toggleIPActive(id.toString())
+                                            cloudPlayAPI.toggleIPActive(id.toString())
                                         }
                                     }
                                     
@@ -306,7 +306,7 @@ Item {
                                         Material.background: Material.Red
                                         
                                         onClicked: {
-                                            cloudApi.deleteIPAddress(id.toString())
+                                            cloudPlayAPI.deleteIPAddress(id.toString())
                                         }
                                     }
                                 }
@@ -319,7 +319,7 @@ Item {
                 GroupBox {
                     title: "Gaming Profiles"
                     Layout.fillWidth: true
-                    visible: cloudApi.authenticated
+                    visible: cloudPlayAPI.authenticated
                     Material.theme: Material.Dark
                     
                     ColumnLayout {
@@ -333,7 +333,7 @@ Item {
                                 Material.background: Material.Blue
                                 
                                 onClicked: {
-                                    cloudApi.getGamingProfiles()
+                                    cloudPlayAPI.getGamingProfiles()
                                 }
                             }
                             
@@ -397,7 +397,7 @@ Item {
                                         
                                         onClicked: {
                                             // Start gaming session with this profile
-                                            cloudApi.startGamingSession(id, "192.168.1.100")
+                                            cloudPlayAPI.startGamingSession(id, "192.168.1.100")
                                         }
                                     }
                                     
@@ -417,7 +417,7 @@ Item {
                                         Material.background: Material.Red
                                         
                                         onClicked: {
-                                            cloudApi.deleteGamingProfile(id)
+                                            cloudPlayAPI.deleteGamingProfile(id)
                                         }
                                     }
                                 }
@@ -475,7 +475,7 @@ Item {
                     
                     onClicked: {
                         if (usernameField.text && passwordField.text) {
-                            cloudApi.loginUser(usernameField.text, passwordField.text)
+                            cloudPlayAPI.loginUser(usernameField.text, passwordField.text)
                             loginDialog.close()
                         }
                     }
@@ -536,7 +536,7 @@ Item {
                     Material.background: Material.Green
                     
                     onClicked: {
-                        cloudApi.createGamingProfile(profileNameField.text, gameIdField.text)
+                        cloudPlayAPI.createGamingProfile(profileNameField.text, gameIdField.text)
                         createProfileDialog.close()
                         profileNameField.text = ""
                         gameIdField.text = ""
@@ -596,7 +596,7 @@ Item {
                                 "name": editProfileNameField.text,
                                 "game_id": editGameIdField.text
                             }
-                            cloudApi.updateGamingProfile(editProfileDialog.currentProfile.id, settings)
+                            cloudPlayAPI.updateGamingProfile(editProfileDialog.currentProfile.id, settings)
                         }
                         editProfileDialog.close()
                     }
@@ -643,7 +643,7 @@ Item {
         function onGamingProfileUpdated(profileId) {
             console.log("Gaming profile updated:", profileId)
             // Refresh the profiles list
-            cloudApi.getGamingProfiles()
+            cloudPlayAPI.getGamingProfiles()
         }
         
         function onGamingProfileDeleted(profileId) {
@@ -666,6 +666,6 @@ Item {
     Component.onCompleted: {
         console.log("CloudPlay Dashboard loaded")
         // Auto-login with CloudPlay credentials
-        cloudApi.loginUser("muslimuz", "Muslim123@")
+        cloudPlayAPI.loginUser("muslimuz", "Muslim123@")
     }
 }
