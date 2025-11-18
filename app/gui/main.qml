@@ -9,6 +9,7 @@ import AutoUpdateChecker 1.0
 import StreamingPreferences 1.0
 import SystemProperties 1.0
 import SdlGamepadKeyNavigation 1.0
+import CloudPlayAPI 1.0
 
 ApplicationWindow {
     property bool pollingActive: false
@@ -296,6 +297,26 @@ ApplicationWindow {
 
                 // TODO need to make sure browser is brought to foreground.
                 onClicked: Qt.openUrlExternally("https://moonlight-stream.org/discord");
+
+                Keys.onDownPressed: {
+                    stackView.currentItem.forceActiveFocus(Qt.TabFocus)
+                }
+            }
+
+            NavigableToolButton {
+                id: cloudPlayButton
+                visible: stackView.currentItem instanceof PcView
+
+                iconSource: "qrc:/res/ic_computer_white_48px.svg"
+
+                ToolTip.delay: 1000
+                ToolTip.timeout: 3000
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("CloudPlay Dashboard")
+
+                onClicked: {
+                    navigateToUrl("qrc:/gui/CloudPlayDashboard.qml")
+                }
 
                 Keys.onDownPressed: {
                     stackView.currentItem.forceActiveFocus(Qt.TabFocus)

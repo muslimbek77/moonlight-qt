@@ -32,7 +32,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = moonlight6.1.0
-DISTDIR = /home/muslim/moonlight-qt/app/.tmp/moonlight6.1.0
+DISTDIR = /home/rasulbek/muslim-projects/moonlight-qt/app/.tmp/moonlight6.1.0
 SUBTARGETS    =  \
 		release \
 		debug

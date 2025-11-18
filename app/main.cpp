@@ -44,6 +44,7 @@
 #include "backend/autoupdatechecker.h"
 #include "backend/computermanager.h"
 #include "backend/systemproperties.h"
+#include "backend/cloudplayapi.h"
 #include "streaming/session.h"
 #include "settings/streamingpreferences.h"
 #include "gui/sdlgamepadkeynavigation.h"
@@ -743,6 +744,11 @@ int main(int argc, char *argv[])
                                                    [](QQmlEngine* qmlEngine, QJSEngine*) -> QObject* {
                                                        return StreamingPreferences::get(qmlEngine);
                                                    });
+    qmlRegisterSingletonType<CloudPlayAPI>("CloudPlayAPI", 1, 0,
+                                           "CloudPlayAPI",
+                                           [](QQmlEngine*, QJSEngine*) -> QObject* {
+                                               return new CloudPlayAPI();
+                                           });
 
     // Create the identity manager on the main thread
     IdentityManager::get();
@@ -773,7 +779,7 @@ int main(int argc, char *argv[])
 
     switch (commandLineParserResult) {
     case GlobalCommandLineParser::NormalStartRequested:
-        initialView = "qrc:/gui/PcView.qml";
+        initialView = "qrc:/gui/CloudPlayDashboard.qml";
         break;
     case GlobalCommandLineParser::StreamRequested:
         {
